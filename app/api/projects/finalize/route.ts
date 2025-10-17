@@ -10,6 +10,15 @@ export async function POST(req: NextRequest) {
       projectData: Partial<ProjectDefinition>;
     };
 
+    // Generate GitHub repo name from title
+    const repoName = projectData.title!
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    // Mock GitHub repo URL (will be replaced with actual GitHub API call)
+    const githubRepoUrl = `https://github.com/${process.env.GITHUB_ORG || 'your-org'}/${repoName}`;
+
     // Save project to database
     const project = await prisma.project.create({
       data: {
@@ -27,12 +36,16 @@ export async function POST(req: NextRequest) {
         budgetHours: projectData.budgetHours,
         budgetAmount: projectData.budgetAmount,
         clarifyingAnswers: JSON.stringify(answers),
+        githubRepoUrl,
         status: 'planning',
       },
     });
 
+    // TODO: Replace with actual GitHub API integration
+    // const repoUrl = await createGitHubRepository(projectData.title!, projectData.description!);
+
     // TODO: Trigger AI workflow to:
-    // 1. Create GitHub repository
+    // 1. ✅ Create GitHub repository (mocked)
     // 2. Generate task breakdown
     // 3. Assign tasks to employees based on skills/availability
     // 4. Create GitHub issues
@@ -44,6 +57,7 @@ export async function POST(req: NextRequest) {
         id: project.id,
         title: project.title,
         status: project.status,
+        githubRepoUrl: project.githubRepoUrl,
       },
     });
   } catch (error) {

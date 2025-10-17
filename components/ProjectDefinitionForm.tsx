@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ProjectDefinition, CoreSkill, PriorityLevel, EffortLevel, ClarifyingQuestion, ProjectSetupResponse } from '@/lib/types';
 import ClarifyingQuestionsModal from './ClarifyingQuestionsModal';
+import ProjectSetupModal from './ProjectSetupModal';
 
 const CORE_SKILLS: { value: CoreSkill; label: string }[] = [
   { value: 'frontend', label: 'Frontend' },
@@ -32,6 +33,7 @@ export default function ProjectDefinitionForm() {
   const [showClarifyingQuestions, setShowClarifyingQuestions] = useState(false);
   const [clarifyingQuestions, setClarifyingQuestions] = useState<ClarifyingQuestion[]>([]);
   const [projectId, setProjectId] = useState<string>('');
+  const [showSetupModal, setShowSetupModal] = useState(false);
 
   const handleSkillToggle = (skill: CoreSkill) => {
     setFormData((prev) => ({
@@ -95,6 +97,7 @@ export default function ProjectDefinitionForm() {
   const handleClarifyingQuestionsComplete = async (answers: Record<string, string | string[]>) => {
     console.log('Clarifying answers:', answers);
     setShowClarifyingQuestions(false);
+    setShowSetupModal(true);
 
     // Submit answers to finalize project setup
     try {
@@ -111,13 +114,16 @@ export default function ProjectDefinitionForm() {
       const data = await response.json();
       console.log('Project finalized:', data);
 
-      // Redirect to project detail page
-      if (data.success && data.project?.id) {
-        window.location.href = `/projects/${data.project.id}`;
-      }
+      // Setup modal will redirect when complete
     } catch (error) {
       console.error('Failed to finalize project:', error);
+      setShowSetupModal(false);
     }
+  };
+
+  const handleSetupComplete = () => {
+    // Redirect to project detail page
+    window.location.href = `/projects/${projectId}`;
   };
 
   return (
@@ -128,6 +134,14 @@ export default function ProjectDefinitionForm() {
           questions={clarifyingQuestions}
           onComplete={handleClarifyingQuestionsComplete}
           onCancel={() => setShowClarifyingQuestions(false)}
+        />
+      )}
+
+      {showSetupModal && (
+        <ProjectSetupModal
+          projectId={projectId}
+          projectTitle={formData.title || 'Your Project'}
+          onComplete={handleSetupComplete}
         />
       )}
 
