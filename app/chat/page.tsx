@@ -1,6 +1,7 @@
 import App from "../App";
 
-export default function ChatPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
-  const initial = typeof searchParams?.initial === 'string' ? decodeURIComponent(searchParams!.initial) : undefined;
+export default async function ChatPage({ searchParams }: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
+  const initial = typeof params?.initial === 'string' ? decodeURIComponent(params.initial) : undefined;
   return <App initialMessage={initial} />;
 }
