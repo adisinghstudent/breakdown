@@ -59,7 +59,7 @@ export default function ClarifyingQuestionsModal({
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-normal text-gray-900">
                 Clarifying Questions
               </h2>
               <button
@@ -69,7 +69,7 @@ export default function ClarifyingQuestionsModal({
                 ×
               </button>
             </div>
-            <p className="text-gray-600">
+            <p className="text-gray-700 font-serif italic">
               Help us understand your project better
             </p>
             <div className="mt-4 flex gap-2">
@@ -94,7 +94,7 @@ export default function ClarifyingQuestionsModal({
                 <span className="ml-2 text-red-500 text-sm">Required</span>
               )}
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            <h3 className="text-xl font-medium text-gray-900 mb-6">
               {currentQuestion.question}
             </h3>
 

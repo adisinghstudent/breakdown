@@ -89,8 +89,8 @@ export default function ProjectsPage() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-5xl font-bold text-gray-900">Projects</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-5xl font-normal text-gray-900">Projects</h1>
             <Link
               href="/create-project"
               className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
@@ -98,6 +98,7 @@ export default function ProjectsPage() {
               + New Project
             </Link>
           </div>
+          <p className="mb-6 text-gray-700 font-serif italic">Your work at a glance</p>
 
           {/* Tabs */}
           <div className="flex gap-2 border-b border-gray-300">
@@ -151,7 +152,7 @@ export default function ProjectsPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <h3 className="text-xl font-normal text-gray-900 mb-2">
                       {project.title}
                     </h3>
                     <div className="flex items-center gap-2">

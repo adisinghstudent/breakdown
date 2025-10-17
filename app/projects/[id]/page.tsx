@@ -172,9 +172,10 @@ export default function ProjectDetailPage({
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              <h1 className="text-4xl font-normal text-gray-900 mb-3">
                 {project.title}
               </h1>
+              <p className="text-gray-700 font-serif italic mb-2">Project overview</p>
               <div className="flex items-center gap-3">
                 <span
                   className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(
@@ -237,12 +238,12 @@ export default function ProjectDetailPage({
 
           {/* Progress */}
           <div className="mb-6">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-gray-700 font-semibold">Overall Progress</span>
-              <span className="font-bold text-gray-900 text-lg">
+              <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-gray-700">Overall Progress</span>
+              <span className="text-gray-900 text-lg">
                 {getProgress()}%
               </span>
-            </div>
+              </div>
             <div className="w-full bg-gray-200 rounded-full h-4">
               <div
                 className="bg-orange-500 h-4 rounded-full transition-all"
@@ -255,25 +256,25 @@ export default function ProjectDetailPage({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Total Tasks</div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl text-gray-900">
                 {project.tasks.length}
               </div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Team Members</div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl text-gray-900">
                 {project.assignments.length}
               </div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Hours Spent</div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl text-gray-900">
                 {totalHoursSpent}h
               </div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Est. Hours</div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl text-gray-900">
                 {totalEstimatedHours}h
               </div>
             </div>
@@ -285,7 +286,7 @@ export default function ProjectDetailPage({
           <div className="lg:col-span-2 space-y-6">
             {/* Goals */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Goals</h2>
+              <h2 className="text-2xl font-normal text-gray-900 mb-4">Goals</h2>
               <ul className="space-y-2">
                 {project.goals.map((goal, index) => (
                   <li key={index} className="flex items-start gap-3">
@@ -308,7 +309,7 @@ export default function ProjectDetailPage({
 
             {/* Tasks */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Tasks</h2>
+              <h2 className="text-2xl font-normal text-gray-900 mb-4">Tasks</h2>
               {project.tasks.length === 0 ? (
                 <p className="text-gray-600">No tasks created yet.</p>
               ) : (
@@ -319,7 +320,7 @@ export default function ProjectDetailPage({
                       className="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">{task.title}</h3>
+                        <h3 className="text-gray-900">{task.title}</h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${getTaskStatusColor(
                             task.status
@@ -374,25 +375,25 @@ export default function ProjectDetailPage({
           <div className="space-y-6">
             {/* Timeline */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Timeline</h2>
+              <h2 className="text-xl font-normal text-gray-900 mb-4">Timeline</h2>
               <div className="space-y-3">
                 <div>
                   <div className="text-sm text-gray-600">Created</div>
-                  <div className="font-semibold text-gray-900">
-                    {new Date(project.createdAt).toLocaleDateString()}
-                  </div>
+                        <div className="text-gray-900">
+                          {new Date(project.createdAt).toLocaleDateString()}
+                        </div>
                 </div>
                 {project.deadline && (
                   <div>
                     <div className="text-sm text-gray-600">Deadline</div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="text-gray-900">
                       {new Date(project.deadline).toLocaleDateString()}
                     </div>
                   </div>
                 )}
                 <div>
                   <div className="text-sm text-gray-600">Last Updated</div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="text-gray-900">
                     {new Date(project.updatedAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -401,7 +402,7 @@ export default function ProjectDetailPage({
 
             {/* Team Members */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Team</h2>
+              <h2 className="text-xl font-normal text-gray-900 mb-4">Team</h2>
               {project.assignments.length === 0 ? (
                 <p className="text-gray-600 text-sm">No team members assigned yet.</p>
               ) : (
@@ -412,7 +413,7 @@ export default function ProjectDetailPage({
                       className="flex items-center justify-between"
                     >
                       <div>
-                        <div className="font-semibold text-gray-900">
+                        <div className="text-gray-900">
                           {assignment.employee.name}
                         </div>
                         <div className="text-sm text-gray-600">
@@ -421,7 +422,7 @@ export default function ProjectDetailPage({
                       </div>
                       <div className="text-right">
                         <div className="text-xs text-gray-600">Workload</div>
-                        <div className="text-sm font-semibold text-gray-900">
+                        <div className="text-sm text-gray-900">
                           {assignment.employee.currentWorkload}%
                         </div>
                       </div>
@@ -433,7 +434,7 @@ export default function ProjectDetailPage({
 
             {/* Required Skills */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-normal text-gray-900 mb-4">
                 Required Skills
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -451,12 +452,12 @@ export default function ProjectDetailPage({
             {/* Budget */}
             {(project.budgetHours || project.budgetAmount) && (
               <div className="bg-white rounded-2xl shadow-xl p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Budget</h2>
+                <h2 className="text-xl font-normal text-gray-900 mb-4">Budget</h2>
                 <div className="space-y-2">
                   {project.budgetHours && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Hours</span>
-                      <span className="font-semibold text-gray-900">
+                      <span className="text-gray-900">
                         {project.budgetHours}h
                       </span>
                     </div>
@@ -464,7 +465,7 @@ export default function ProjectDetailPage({
                   {project.budgetAmount && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Amount</span>
-                      <span className="font-semibold text-gray-900">
+                      <span className="text-gray-900">
                         ${project.budgetAmount.toLocaleString()}
                       </span>
                     </div>

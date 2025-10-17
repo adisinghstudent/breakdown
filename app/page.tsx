@@ -4,16 +4,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-200 via-orange-50 to-orange-100 flex items-center justify-center">
       <div className="max-w-4xl mx-auto px-6 text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-6">
-          Shape your ideas into
-          <br />
-          apps that work your way
+        <h1 className="text-6xl font-normal text-gray-900 mb-4">
+          Breakdown by Silicon Valhalla
         </h1>
-        <p className="text-xl text-gray-600 mb-12">
-          Breakdown lets you build fully-functional projects in minutes with just your words. No coding necessary.
+        <p className="text-xl text-gray-700 mb-10 font-serif italic">
+          Shape your ideas into apps that work your way
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
           <Link
             href="/create-project"
             className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-colors"
@@ -35,7 +33,7 @@ export default function Home() {
         </div>
 
         <div className="text-center mb-16">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 font-serif italic">
             Create, track, and manage AI-powered projects with automated task breakdown and team assignments
           </p>
         </div>

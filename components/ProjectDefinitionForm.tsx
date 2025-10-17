@@ -34,6 +34,7 @@ export default function ProjectDefinitionForm() {
   const [clarifyingQuestions, setClarifyingQuestions] = useState<ClarifyingQuestion[]>([]);
   const [projectId, setProjectId] = useState<string>('');
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [initialPrompt, setInitialPrompt] = useState<string>('');
 
   const handleSkillToggle = (skill: CoreSkill) => {
     setFormData((prev) => ({
@@ -82,10 +83,21 @@ export default function ProjectDefinitionForm() {
         setProjectId(data.projectId);
         setClarifyingQuestions(data.clarifyingQuestions);
         setShowClarifyingQuestions(true);
+        setInitialPrompt(buildInitialPrompt(formData));
       } else {
-        // Navigate to project dashboard or show success
-        console.log('Project created:', data.projectId);
-        // TODO: Navigate to project dashboard
+        // No clarifications needed. Finalize immediately then show setup modal.
+        setProjectId(data.projectId);
+        setInitialPrompt(buildInitialPrompt(formData));
+        try {
+          await fetch('/api/projects/finalize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectId: data.projectId, answers: {}, projectData: formData }),
+          });
+        } catch (err) {
+          console.error('Finalize (no-clarifications) failed', err);
+        }
+        setShowSetupModal(true);
       }
     } catch (error) {
       console.error('Failed to create project:', error);
@@ -113,7 +125,9 @@ export default function ProjectDefinitionForm() {
 
       const data = await response.json();
       console.log('Project finalized:', data);
-
+      // augment initial prompt with clarifying answers
+      const promptWithClarifications = buildInitialPrompt(formData, answers);
+      setInitialPrompt(promptWithClarifications);
       // Setup modal will redirect when complete
     } catch (error) {
       console.error('Failed to finalize project:', error);
@@ -122,8 +136,9 @@ export default function ProjectDefinitionForm() {
   };
 
   const handleSetupComplete = () => {
-    // Redirect to project detail page
-    window.location.href = `/projects/${projectId}`;
+    // Redirect to Chat and send the initial prompt as the first message
+    const encoded = encodeURIComponent(initialPrompt || buildInitialPrompt(formData));
+    window.location.href = `/chat?initial=${encoded}`;
   };
 
   return (
@@ -148,11 +163,11 @@ export default function ProjectDefinitionForm() {
       <div className="min-h-screen bg-gradient-to-b from-sky-200 via-orange-50 to-orange-100">
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-12 text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-5xl font-normal text-gray-900 mb-3">
             Define Your Project
           </h1>
-          <p className="text-lg text-gray-600">
-            Describe your project and let AI handle the rest - from team assembly to task breakdown
+          <p className="text-lg text-gray-700 font-serif italic">
+            Describe your project and let AI handle the rest — from team assembly to task breakdown
           </p>
         </div>
 
@@ -432,4 +447,40 @@ export default function ProjectDefinitionForm() {
     </div>
     </>
   );
+}
+
+// Compose a concise first message to seed ChatKit
+function buildInitialPrompt(
+  data: Partial<ProjectDefinition>,
+  clarifications?: Record<string, string | string[]>
+): string {
+  const lines: string[] = [];
+  if (data.title) lines.push(`Project: ${data.title}`);
+  if (data.description) lines.push(`Description: ${data.description}`);
+  if (data.goals && data.goals.length) {
+    const goals = data.goals.filter(Boolean).map((g) => `- ${g}`).join('\n');
+    lines.push(`Goals:\n${goals}`);
+  }
+  if (data.requiredSkills && data.requiredSkills.length) {
+    lines.push(`Core skills: ${data.requiredSkills.join(', ')}`);
+  }
+  if (data.timelinePreference) lines.push(`Timeline: ${data.timelinePreference}`);
+  if (data.deadline) lines.push(`Deadline: ${new Date(data.deadline).toDateString()}`);
+  if (data.priority) lines.push(`Priority: ${data.priority}`);
+  if (data.teamSize) lines.push(`Team size: ${data.teamSize}`);
+  if (typeof data.budgetHours === 'number') lines.push(`Budget (hours): ${data.budgetHours}`);
+  if (typeof data.budgetAmount === 'number') lines.push(`Budget (amount): ${data.budgetAmount}`);
+  if (data.dependencies && data.dependencies.length) {
+    lines.push(`Dependencies: ${data.dependencies.join(', ')}`);
+  }
+  if (clarifications && Object.keys(clarifications).length) {
+    const parts = Object.entries(clarifications)
+      .map(([k, v]) => `- ${k.replace('question_', 'Q')}: ${Array.isArray(v) ? v.join(', ') : v}`)
+      .join('\n');
+    lines.push(`Clarifications:\n${parts}`);
+  }
+  lines.push(
+    'Please create an initial plan with milestones and tasks, and ask any missing questions before proceeding. Start by acknowledging the project and summarizing next steps.'
+  );
+  return lines.join('\n');
 }

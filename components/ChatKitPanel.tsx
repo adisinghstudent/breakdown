@@ -24,6 +24,7 @@ type ChatKitPanelProps = {
   onWidgetAction: (action: FactAction) => Promise<void>;
   onResponseEnd: () => void;
   onThemeRequest: (scheme: ColorScheme) => void;
+  initialMessage?: string;
 };
 
 type ErrorState = {
@@ -48,6 +49,7 @@ export function ChatKitPanel({
   onWidgetAction,
   onResponseEnd,
   onThemeRequest,
+  initialMessage,
 }: ChatKitPanelProps) {
   const processedFacts = useRef(new Set<string>());
   const [errors, setErrors] = useState<ErrorState>(() => createInitialErrors());
@@ -61,6 +63,7 @@ export function ChatKitPanel({
       : "pending"
   );
   const [widgetInstanceKey, setWidgetInstanceKey] = useState(0);
+  const initialMessageSentRef = useRef(false);
 
   const setErrorState = useCallback((updates: Partial<ErrorState>) => {
     setErrors((current) => ({ ...current, ...updates }));
@@ -371,6 +374,20 @@ export function ChatKitPanel({
       });
     },
   });
+
+  // Auto-send initial message once the widget is ready and session is initialized
+  useEffect(() => {
+    if (!initialMessage || initialMessageSentRef.current) return;
+    if (scriptStatus !== "ready" || isInitializingSession) return;
+    // Send as a new thread to ensure it's the first message
+    initialMessageSentRef.current = true;
+    void chatkit
+      .sendUserMessage({ text: initialMessage, newThread: true })
+      .catch((err) => {
+        console.error("Failed to send initial message", err);
+        initialMessageSentRef.current = false; // allow retry on failure
+      });
+  }, [initialMessage, scriptStatus, isInitializingSession, chatkit]);
 
   // no external control surface
 
