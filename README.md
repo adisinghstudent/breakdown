@@ -95,8 +95,234 @@ curl -s http://localhost:3000/api/telemetry \
 
 Messages include: `type`, `workflowId`, `userId` (from the session cookie), `data`, and `ts`.
 
+---
+
+## Undergoing Project Agent Backend
+
+This project includes a Python-based **Undergoing Project Agent** that provides real-time reactive coordination for ongoing software projects. The agent monitors GitHub/Jira issues, applies intelligent policies, and takes automated actions.
+
+### Architecture
+
+```
+GitHub/Jira Webhooks → Redpanda (issues topic) → Gateway Consumer → AgentKit Agent
+                                                                          ↓
+                                                        Actions (assign, nudge, schedule)
+                                                                          ↓
+                                                  Calendar/Notification APIs + Redpanda (actions/outcomes topics)
+```
+
+### What the Agent Does
+
+The Undergoing Project agent automatically:
+- **Monitors** issue events from GitHub and Jira
+- **Applies policies** to determine appropriate actions:
+  - High-priority bugs (P0) → escalate to platform team
+  - Frontend issues → assign to specialists
+  - Overdue tasks → schedule unblocker meetings
+  - New issues → send triage nudges
+- **Takes actions** via calendar and notification APIs
+- **Records outcomes** to Redpanda for observability
+
+### Backend Directory Structure
+
+```
+backend/
+├── webhooks/           # GitHub/Jira webhook receivers
+├── gateway/            # Consumer that processes events
+├── agentkit/           # AgentKit integration + mock agent
+├── calendar/           # Mock calendar/notification API
+├── events/             # Event publisher CLI for testing
+├── samples/            # Sample event JSON files
+└── docker/             # Redpanda Docker Compose setup
+```
+
+### Quick Start
+
+#### 1. Install Python Dependencies
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+#### 2. Configure Environment
+
+```bash
+cp backend/.env.example backend/.env
+# Edit backend/.env with your configuration
+```
+
+Key variables:
+- `PANDA_PROXY` - Redpanda Pandaproxy URL (default: http://localhost:8082)
+- `AGENTKIT_URL` - Your AgentKit agent endpoint
+- `CALENDAR_API_BASE` - Calendar service URL
+- `GITHUB_WEBHOOK_SECRET` - GitHub webhook secret
+
+#### 3. Start All Services
+
+```bash
+bash backend/start-all.sh
+```
+
+This will:
+1. Start local Redpanda via Docker Compose
+2. Create required topics (issues, builds, vendors, actions, outcomes, dlq)
+3. Launch all backend services:
+   - Mock Calendar API (port 7300)
+   - Mock AgentKit Agent (port 8000)
+   - GitHub Webhook Receiver (port 7000)
+   - Gateway Consumer (background)
+
+#### 4. Test the Event Flow
+
+```bash
+bash backend/test-flow.sh
+```
+
+This publishes sample events and demonstrates:
+- P0 bug → escalation to platform team
+- Frontend issue → assignment to Alice
+- Overdue Jira issue → unblocker meeting scheduled
+- Documentation issue → triage nudge sent
+
+#### 5. Monitor Activity
+
+Check logs:
+```bash
+tail -f logs/gateway.log    # Gateway consumer processing
+tail -f logs/agentkit.log   # Agent decisions and actions
+tail -f logs/calendar.log   # Calendar API calls
+```
+
+Or consume from Redpanda topics:
+```bash
+# View actions taken by the agent
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk topic consume actions -n 10
+
+# View outcomes and risk deltas
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk topic consume outcomes -n 10
+```
+
+#### 6. Stop All Services
+
+```bash
+bash backend/stop-all.sh
+```
+
+### Manual Testing
+
+Publish individual events:
+```bash
+python3 backend/events/publish.py --topic issues --file backend/samples/issue_bug_p0.json
+```
+
+Test webhook endpoint:
+```bash
+curl -X POST http://localhost:7000/github/issues \
+  -H "X-GitHub-Event: issues" \
+  -H "X-GitHub-Delivery: test-123" \
+  -H "Content-Type: application/json" \
+  -d @backend/samples/issue_bug_p0.json
+```
+
+### Message Schemas
+
+**Issues Topic:**
+```json
+{
+  "event_id": "unique-id",
+  "project_id": "alpha",
+  "source": "github|jira",
+  "type": "issue_opened|issue_created|issue_updated",
+  "repo": "org/repo",
+  "issue_number": 123,
+  "title": "Bug: login fails",
+  "url": "https://...",
+  "labels": ["bug", "p0"],
+  "assignee": "alice",
+  "priority": "P0|Highest",
+  "status": "Open",
+  "created_at": "2025-10-17T19:22:11Z"
+}
+```
+
+**Actions Topic:**
+```json
+{
+  "event_id": "a-timestamp",
+  "project_id": "alpha",
+  "action": "assign_owner|post_nudge|schedule_unblocker|escalate_owner",
+  "target": "owner:alice|team:platform",
+  "rationale": "High priority bug requires immediate attention",
+  "source_ref": "https://github.com/org/repo/issues/123"
+}
+```
+
+**Outcomes Topic:**
+```json
+{
+  "event_id": "o-timestamp",
+  "project_id": "alpha",
+  "risk_delta": -0.2,
+  "ack": true
+}
+```
+
+### Integration with ChatKit Frontend
+
+The backend agent works alongside your ChatKit chat interface:
+
+1. **Chat Interface** (`localhost:3000`) - For conversational interactions with your agent
+2. **Backend Agent** - For automated reactive coordination of ongoing work
+
+Both can share the same Redpanda cluster. The chat interface uses the `chatkit_telemetry` topic, while the backend agent uses `issues`, `actions`, and `outcomes` topics.
+
+### Connecting to Redpanda Cloud
+
+To use your existing Redpanda Cloud cluster instead of local Docker:
+
+1. Update `backend/.env`:
+```bash
+PANDA_CLOUD_BROKERS="your-cluster.cloud.redpanda.com:9092"
+PANDA_CLOUD_USERNAME="your-username"
+PANDA_CLOUD_PASSWORD="your-password"
+```
+
+2. Modify `backend/gateway/consumer.py` and webhook receivers to use KafkaJS client instead of Pandaproxy REST API.
+
+### Customizing Agent Policies
+
+Edit `backend/agentkit/mock_agent.py` function `apply_undergoing_policy()` to customize:
+- When to escalate vs assign
+- Which team members handle which labels
+- Notification thresholds
+- Calendar meeting durations
+
+For production, replace the mock agent with your real AgentKit endpoint by updating `AGENTKIT_URL` in `backend/.env`.
+
+### Troubleshooting
+
+**Redpanda not starting:**
+```bash
+docker compose -f backend/docker/docker-compose.yml logs redpanda
+```
+
+**Consumer not receiving messages:**
+```bash
+# Check topic exists
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk topic list
+
+# Check consumer lag
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk group describe agent-gw
+```
+
+**Webhook signature failures:**
+Ensure `GITHUB_WEBHOOK_SECRET` in `backend/.env` matches your GitHub webhook configuration.
+
+---
+
 ## References
 
 - [ChatKit JavaScript Library](http://openai.github.io/chatkit-js/)
 - [Advanced Self-Hosting Examples](https://github.com/openai/openai-chatkit-advanced-samples)
-# breakdown
+- [Redpanda Documentation](https://docs.redpanda.com/)
+- [AgentKit Documentation](https://github.com/BCG-X-Official/agentkit)
