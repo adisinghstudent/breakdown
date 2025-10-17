@@ -24,11 +24,37 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: Arial, Helvetica, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
 
 body {
-  background: var(--background);
+  /* Subtle light gradient to enhance glass blur */
+  background: radial-gradient(1200px 800px at -10% -10%, #e9efff80 0%, transparent 45%),
+    radial-gradient(1000px 1000px at 110% 0%, #ffeef780 0%, transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
+}
+
+/* Dark mode background stays subtle for readability */
+:root[data-color-scheme="dark"] body {
+  background: radial-gradient(1200px 800px at -10% -10%, #0b122480 0%, transparent 45%),
+    radial-gradient(1000px 1000px at 110% 0%, #1f0f2980 0%, transparent 40%),
+    linear-gradient(180deg, #0a0a0a 0%, #0f172a 100%);
+}
+
+/* Glass panel utility for reusable glassmorphism */
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.65);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+:root[data-color-scheme="dark"] .glass-panel {
+  background-color: rgba(2, 6, 23, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
 }

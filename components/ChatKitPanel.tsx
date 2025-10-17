@@ -372,6 +372,8 @@ export function ChatKitPanel({
     },
   });
 
+  // no external control surface
+
   const activeError = errors.session ?? errors.integration;
   const blockingError = errors.script ?? activeError;
 
@@ -386,7 +388,7 @@ export function ChatKitPanel({
   }
 
   return (
-    <div className="relative pb-8 flex h-[90vh] w-full rounded-2xl flex-col overflow-hidden bg-white shadow-sm transition-colors dark:bg-slate-900">
+    <div className="relative pb-8 flex h-[90vh] w-full rounded-2xl flex-col overflow-hidden bg-white text-slate-900 shadow-xl ring-1 ring-black/10 dark:bg-white dark:text-slate-900">
       <ChatKit
         key={widgetInstanceKey}
         control={chatkit.control}
