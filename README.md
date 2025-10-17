@@ -65,7 +65,38 @@ Before deploying your app, you need to verify the domain by adding it to the [Do
 - Adjust starter prompts, greeting text, [chatkit theme](https://chatkit.studio/playground), and placeholder copy in [`lib/config.ts`](lib/config.ts).
 - Update the event handlers inside [`components/.tsx`](components/ChatKitPanel.tsx) to integrate with your product analytics or storage.
 
+## Optional: Redpanda Telemetry
+
+This starter can emit chat telemetry (response start/end, tool calls, thread changes, and widget errors) to a Redpanda/Kafka topic using `kafkajs`.
+
+1) Install the dependency:
+
+```bash
+npm i kafkajs
+```
+
+2) Configure environment variables in `.env.local` (see `.env.example` for all options):
+
+- `REDPANDA_BROKERS` — Comma-separated broker list from your Redpanda Cloud cluster overview.
+- `REDPANDA_SASL_USERNAME` / `REDPANDA_SASL_PASSWORD` — API key and secret.
+- `REDPANDA_SASL_MECHANISM` — `scram-sha-256` (default) or `scram-sha-512`.
+- `REDPANDA_CA_CERT` — Paste the PEM CA certificate content, or use `REDPANDA_CA_CERT_BASE64`.
+- `REDPANDA_TELEMETRY_TOPIC` — Defaults to `chatkit_telemetry`.
+
+3) Run the app and interact with the chat. The client sends events to `POST /api/telemetry`, and the server publishes them to your topic. If Redpanda env vars are not set, the endpoint no-ops and returns `{ status: "disabled" }`.
+
+4) Quick test without the UI:
+
+```bash
+curl -s http://localhost:3000/api/telemetry \
+  -H 'content-type: application/json' \
+  -d '{"type":"smoke_test","data":{"hello":"world"}}'
+```
+
+Messages include: `type`, `workflowId`, `userId` (from the session cookie), `data`, and `ts`.
+
 ## References
 
 - [ChatKit JavaScript Library](http://openai.github.io/chatkit-js/)
 - [Advanced Self-Hosting Examples](https://github.com/openai/openai-chatkit-advanced-samples)
+# breakdown
