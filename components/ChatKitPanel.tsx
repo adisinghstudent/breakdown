@@ -66,6 +66,26 @@ export function ChatKitPanel({
     setErrors((current) => ({ ...current, ...updates }));
   }, []);
 
+  const postTelemetry = useCallback(
+    async (event: {
+      type: string;
+      workflowId?: string;
+      toolName?: string;
+      data?: Record<string, unknown>;
+    }) => {
+      try {
+        await fetch("/api/telemetry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...event, ts: Date.now() }),
+        });
+      } catch {
+        // no-op
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
@@ -309,24 +329,46 @@ export function ChatKitPanel({
           factId: id,
           factText: text.replace(/\s+/g, " ").trim(),
         });
+        // Fire telemetry for fact save
+        void postTelemetry({
+          type: "client_tool",
+          toolName: "record_fact",
+          data: { factId: id },
+          workflowId: WORKFLOW_ID,
+        });
         return { success: true };
       }
 
+      // Fire telemetry for any other tool invocation
+      void postTelemetry({
+        type: "client_tool",
+        toolName: invocation.name,
+        data: invocation.params,
+        workflowId: WORKFLOW_ID,
+      });
       return { success: false };
     },
     onResponseEnd: () => {
       onResponseEnd();
+      void postTelemetry({ type: "response_end", workflowId: WORKFLOW_ID });
     },
     onResponseStart: () => {
       setErrorState({ integration: null, retryable: false });
+      void postTelemetry({ type: "response_start", workflowId: WORKFLOW_ID });
     },
     onThreadChange: () => {
       processedFacts.current.clear();
+      void postTelemetry({ type: "thread_change", workflowId: WORKFLOW_ID });
     },
     onError: ({ error }: { error: unknown }) => {
       // Note that Chatkit UI handles errors for your users.
       // Thus, your app code doesn't need to display errors on UI.
       console.error("ChatKit error", error);
+      void postTelemetry({
+        type: "widget_error",
+        workflowId: WORKFLOW_ID,
+        data: { message: error instanceof Error ? error.message : String(error) },
+      });
     },
   });
 
