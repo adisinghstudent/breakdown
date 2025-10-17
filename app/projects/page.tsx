@@ -21,9 +21,24 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('current');
   const [isLoading, setIsLoading] = useState(true);
+  const [issuesTotal, setIssuesTotal] = useState<number>(0);
 
   useEffect(() => {
     fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    const loadIssues = async () => {
+      try {
+        const res = await fetch('/api/github/issues-count');
+        const data = await res.json();
+        setIssuesTotal(typeof data.total === 'number' ? data.total : 0);
+      } catch (e) {
+        console.error('Failed to load GitHub issues count', e);
+        setIssuesTotal(0);
+      }
+    };
+    loadIssues();
   }, []);
 
   const fetchProjects = async () => {
@@ -91,9 +106,25 @@ export default function ProjectsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-5xl font-normal text-gray-900">Projects</h1>
-            <Link href="/create-project" className="glass-btn glass-btn-primary">
-              + New Project
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  if (!confirm('Delete all projects? This cannot be undone.')) return;
+                  try {
+                    await fetch('/api/projects', { method: 'DELETE' });
+                    setProjects([]);
+                  } catch (err) {
+                    console.error('Failed to delete all projects', err);
+                  }
+                }}
+                className="glass-btn"
+              >
+                Clear All
+              </button>
+              <Link href="/create-project" className="glass-btn glass-btn-primary">
+                + New Project
+              </Link>
+            </div>
           </div>
           <p className="mb-6 text-gray-700 font-serif italic">Your work at a glance</p>
 
@@ -141,7 +172,7 @@ export default function ProjectsPage() {
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
-                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
+                className="relative bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -162,6 +193,23 @@ export default function ProjectsPage() {
                       </span>
                     </div>
                   </div>
+                  <button
+                    className="glass-btn absolute right-4 top-4 text-xs"
+                    title="Delete project"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!confirm('Delete this project?')) return;
+                      try {
+                        await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
+                        setProjects((prev) => prev.filter((p) => p.id !== project.id));
+                      } catch (err) {
+                        console.error('Failed to delete project', err);
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
 
                 {/* Description */}
@@ -203,7 +251,7 @@ export default function ProjectsPage() {
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                       />
                     </svg>
-                    <span>{project.tasks.length} tasks</span>
+                    <span>{issuesTotal} tasks</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <svg
@@ -219,7 +267,7 @@ export default function ProjectsPage() {
                         d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                       />
                     </svg>
-                    <span>{project.assignments.length} members</span>
+                    <span>3 members</span>
                   </div>
                 </div>
               </Link>

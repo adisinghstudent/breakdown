@@ -54,10 +54,25 @@ export default function ProjectDetailPage({
   const { id } = use(params);
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [issuesTotal, setIssuesTotal] = useState<number>(0);
 
   useEffect(() => {
     fetchProject();
   }, [id]);
+
+  useEffect(() => {
+    const loadIssues = async () => {
+      try {
+        const res = await fetch('/api/github/issues-count');
+        const data = await res.json();
+        setIssuesTotal(typeof data.total === 'number' ? data.total : 0);
+      } catch (e) {
+        console.error('Failed to load GitHub issues count', e);
+        setIssuesTotal(0);
+      }
+    };
+    loadIssues();
+  }, []);
 
   const fetchProject = async () => {
     try {
@@ -148,7 +163,8 @@ export default function ProjectDetailPage({
     <div className="min-h-screen bg-gradient-to-b from-sky-200 via-orange-50 to-orange-100">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Back Button */}
-        <Link href="/projects" className="inline-flex items-center glass-btn mb-6">
+        <div className="mb-6 flex items-center gap-2">
+        <Link href="/projects" className="inline-flex items-center glass-btn">
           <svg
             className="w-5 h-5 mr-2"
             fill="none"
@@ -164,6 +180,21 @@ export default function ProjectDetailPage({
           </svg>
           Back to Projects
         </Link>
+        <button
+          className="glass-btn"
+          onClick={async () => {
+            if (!confirm('Delete this project?')) return;
+            try {
+              await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
+              window.location.href = '/projects';
+            } catch (err) {
+              console.error('Failed to delete project', err);
+            }
+          }}
+        >
+          Delete Project
+        </button>
+        </div>
 
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
@@ -189,9 +220,11 @@ export default function ProjectDetailPage({
                 </span>
               </div>
             </div>
-            {project.githubRepoUrl && (
+            {(
+              project.githubRepoUrl || 'https://github.com/adisinghstudent/PiedPiper_megarepo'
+            ) && (
               <a
-                href={project.githubRepoUrl}
+                href={'https://github.com/adisinghstudent/PiedPiper_megarepo'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 glass-btn"
@@ -206,7 +239,9 @@ export default function ProjectDetailPage({
           <p className="text-gray-600 text-lg mb-6">{project.description}</p>
 
           {/* GitHub Repo Card */}
-          {project.githubRepoUrl && (
+          {(
+            project.githubRepoUrl || 'https://github.com/adisinghstudent/PiedPiper_megarepo'
+          ) && (
             <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -215,11 +250,11 @@ export default function ProjectDetailPage({
                   </svg>
                   <div>
                     <div className="text-white font-semibold">Repository</div>
-                    <div className="text-gray-300 text-sm">{project.githubRepoUrl.replace('https://github.com/', '')}</div>
+                    <div className="text-gray-300 text-sm">{'adisinghstudent/PiedPiper_megarepo'}</div>
                   </div>
                 </div>
                 <a
-                  href={project.githubRepoUrl}
+                  href={'https://github.com/adisinghstudent/PiedPiper_megarepo'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
@@ -253,15 +288,11 @@ export default function ProjectDetailPage({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Total Tasks</div>
-              <div className="text-2xl text-gray-900">
-                {project.tasks.length}
-              </div>
+              <div className="text-2xl text-gray-900">{issuesTotal}</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Team Members</div>
-              <div className="text-2xl text-gray-900">
-                {project.assignments.length}
-              </div>
+              <div className="text-2xl text-gray-900">3</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-gray-600 text-sm mb-1">Hours Spent</div>

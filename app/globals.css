@@ -68,7 +68,7 @@ body {
 }
 
 .subtitle-cursive {
-  font-family: var(--font-cursive);
+  font-family: var(--font-dancing), var(--font-cursive);
   font-style: italic;
   font-weight: 500;
 }

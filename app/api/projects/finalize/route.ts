@@ -10,14 +10,8 @@ export async function POST(req: NextRequest) {
       projectData: Partial<ProjectDefinition>;
     };
 
-    // Generate GitHub repo name from title
-    const repoName = projectData.title!
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-
-    // Mock GitHub repo URL (will be replaced with actual GitHub API call)
-    const githubRepoUrl = `https://github.com/${process.env.GITHUB_ORG || 'your-org'}/${repoName}`;
+    // For now, hardcode all projects to use the PiedPiper megarepo
+    const githubRepoUrl = 'https://github.com/adisinghstudent/PiedPiper_megarepo';
 
     // Save project to database
     const project = await prisma.project.create({

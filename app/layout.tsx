@@ -2,6 +2,7 @@ import Script from "next/script";
 import type { Metadata } from "next";
 import { Inter, Dancing_Script } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "AgentKit demo",
@@ -24,7 +25,8 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`antialiased ${inter.variable} ${dancing.variable} ${inter.className}`}>
+      <body className={`antialiased pt-20 ${inter.variable} ${dancing.variable} ${inter.className}`}>
+        <Header />
         {children}
       </body>
     </html>

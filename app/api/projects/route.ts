@@ -38,3 +38,16 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    const result = await prisma.project.deleteMany({});
+    return NextResponse.json({ deleted: result.count });
+  } catch (error) {
+    console.error('Error deleting all projects:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete projects' },
+      { status: 500 }
+    );
+  }
+}
