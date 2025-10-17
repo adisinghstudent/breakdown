@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  goals           String   // JSON array
+  deadline        DateTime?
+  timelinePreference String @default("moderate")
+  effortLevel     String
+  teamSize        Int?
+  requiredSkills  String   // JSON array
+  priority        String   @default("medium")
+  dependencies    String?  // JSON array
+  budgetHours     Int?
+  budgetAmount    Int?
+  status          String   @default("planning")
+  githubRepoUrl   String?
+  clarifyingAnswers String? // JSON object
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tasks           Task[]
+  assignments     ProjectAssignment[]
+}
+
+model Employee {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  skills          String   // JSON array
+  currentWorkload Int      @default(0) // 0-100
+  availability    String   @default("available")
+  currentProjects String   // JSON array
+  performanceScore Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  assignments     ProjectAssignment[]
+  assignedTasks   Task[]
+}
+
+model Task {
+  id              String   @id @default(uuid())
+  projectId       String
+  title           String
+  description     String
+  assignedToId    String?
+  requiredSkills  String   // JSON array
+  estimatedHours  Int
+  priority        String
+  status          String   @default("pending")
+  githubIssueUrl  String?
+  githubPrUrl     String?
+  dependencies    String?  // JSON array (task IDs)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo      Employee? @relation(fields: [assignedToId], references: [id])
+}
+
+model ProjectAssignment {
+  id         String   @id @default(uuid())
+  projectId  String
+  employeeId String
+  assignedAt DateTime @default(now())
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, employeeId])
+}

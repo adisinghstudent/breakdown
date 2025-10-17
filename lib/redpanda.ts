@@ -1,5 +1,7 @@
-let _producer: any = null;
-let _kafka: any = null;
+import type { Producer, Kafka } from 'kafkajs';
+
+let _producer: Producer | null = null;
+let _kafka: Kafka | null = null;
 
 function readCaCert(): string[] | undefined {
   const pem = process.env.REDPANDA_CA_CERT?.trim();
@@ -24,7 +26,7 @@ export function isRedpandaConfigured(): boolean {
   );
 }
 
-export async function getProducer(): Promise<any> {
+export async function getProducer(): Promise<Producer> {
   if (_producer) return _producer;
 
   const { Kafka, logLevel } = await import("kafkajs");
@@ -38,19 +40,26 @@ export async function getProducer(): Promise<any> {
   }
 
   const sslCa = readCaCert();
-  const sasl = {
-    mechanism: (process.env.REDPANDA_SASL_MECHANISM || "scram-sha-256") as
-      | "scram-sha-256"
-      | "scram-sha-512",
-    username: process.env.REDPANDA_SASL_USERNAME || "",
-    password: process.env.REDPANDA_SASL_PASSWORD || "",
-  } as const;
+  const mechanism = process.env.REDPANDA_SASL_MECHANISM || "scram-sha-256";
+
+  const saslConfig =
+    mechanism === "scram-sha-512"
+      ? {
+          mechanism: "scram-sha-512" as const,
+          username: process.env.REDPANDA_SASL_USERNAME || "",
+          password: process.env.REDPANDA_SASL_PASSWORD || "",
+        }
+      : {
+          mechanism: "scram-sha-256" as const,
+          username: process.env.REDPANDA_SASL_USERNAME || "",
+          password: process.env.REDPANDA_SASL_PASSWORD || "",
+        };
 
   _kafka = new Kafka({
     clientId: process.env.REDPANDA_CLIENT_ID || "chatkit-app",
     brokers,
     ssl: sslCa ? { ca: sslCa } : true,
-    sasl,
+    sasl: saslConfig,
     logLevel: logLevel.NOTHING,
   });
 
