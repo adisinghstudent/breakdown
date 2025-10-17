@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  redpanda:
+    image: redpandadata/redpanda:v24.1.10
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092,OUTSIDE://localhost:19092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr http://localhost:8082
+    ports:
+      - "19092:19092"
+      - "8082:8082"
+    networks:
+      - redpanda-net
+
+  rpk:
+    image: redpandadata/redpanda:v24.1.10
+    entrypoint: ["/bin/sh", "-lc", "sleep 3600"]
+    depends_on:
+      - redpanda
+    networks:
+      - redpanda-net
+
+networks:
+  redpanda-net:
+    driver: bridge

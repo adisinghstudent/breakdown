@@ -4,99 +4,267 @@
 ![NextJS](https://img.shields.io/badge/Built_with-NextJS-blue)
 ![OpenAI API](https://img.shields.io/badge/Powered_by-OpenAI_API-orange)
 
-This repository is the simplest way to bootstrap a [ChatKit](http://openai.github.io/chatkit-js/) application. It ships with a minimal Next.js UI, the ChatKit web component, and a ready-to-use session endpoint so you can experiment with OpenAI-hosted workflows built using [Agent Builder](https://platform.openai.com/agent-builder).
+Production-ready ChatKit application with Next.js UI, OpenAI Agent Builder integration, and reactive backend agent for project coordination.
 
-## What You Get
+## Frontend: ChatKit Interface
 
-- Next.js app with `<openai-chatkit>` web component and theming controls
-- API endpoint for creating a session at [`app/api/create-session/route.ts`](app/api/create-session/route.ts)
-- Config file for starter prompts, theme, placeholder text, and greeting message
+### Features
 
-## Getting Started
+- Next.js application with ChatKit web component
+- Session management via `/api/create-session`
+- Configurable prompts, themes, and UI elements
+- Optional Redpanda telemetry integration
 
-### 1. Install dependencies
+### Setup
 
 ```bash
 npm install
-```
-
-### 2. Create your environment file
-
-Copy the example file and fill in the required values:
-
-```bash
 cp .env.example .env.local
 ```
 
-You can get your workflow id from the [Agent Builder](https://platform.openai.com/agent-builder) interface, after clicking "Publish":
+Configure `.env.local`:
+- `OPENAI_API_KEY` - API key from same org/project as Agent Builder
+- `NEXT_PUBLIC_CHATKIT_WORKFLOW_ID` - Workflow ID starting with `wf_`
+- `CHATKIT_API_BASE` - (Optional) Custom API endpoint
 
-<img src="./public/docs/workflow.jpg" width=500 />
-
-You can get your OpenAI API key from the [OpenAI API Keys](https://platform.openai.com/api-keys) page.
-
-### 3. Configure ChatKit credentials
-
-Update `.env.local` with the variables that match your setup.
-
-- `OPENAI_API_KEY` — This must be an API key created **within the same org & project as your Agent Builder**. If you already have a different `OPENAI_API_KEY` env variable set in your terminal session, that one will take precedence over the key in `.env.local` one (this is how a Next.js app works). So, **please run `unset OPENAI_API_KEY` (`set OPENAI_API_KEY=` for Windows OS) beforehand**.
-- `NEXT_PUBLIC_CHATKIT_WORKFLOW_ID` — This is the ID of the workflow you created in [Agent Builder](https://platform.openai.com/agent-builder), which starts with `wf_...`
-- (optional) `CHATKIT_API_BASE` - This is a customizable base URL for the ChatKit API endpoint
-
-> Note: if your workflow is using a model requiring organization verification, such as GPT-5, make sure you verify your organization first. Visit your [organization settings](https://platform.openai.com/settings/organization/general) and click on "Verify Organization".
-
-### 4. Run the app
-
+Start development server:
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` and start chatting. Use the prompts on the start screen to verify your workflow connection, then customize the UI or prompt list in [`lib/config.ts`](lib/config.ts) and [`components/ChatKitPanel.tsx`](components/ChatKitPanel.tsx).
+Access at `http://localhost:3000`. Customize in `lib/config.ts` and `components/ChatKitPanel.tsx`.
 
-### 5. Deploy your app
+### Deployment
 
 ```bash
 npm run build
 ```
 
-Before deploying your app, you need to verify the domain by adding it to the [Domain allowlist](https://platform.openai.com/settings/organization/security/domain-allowlist) on your dashboard.
+Add deployment domain to [Domain allowlist](https://platform.openai.com/settings/organization/security/domain-allowlist).
 
-## Customization Tips
+### Redpanda Telemetry (Optional)
 
-- Adjust starter prompts, greeting text, [chatkit theme](https://chatkit.studio/playground), and placeholder copy in [`lib/config.ts`](lib/config.ts).
-- Update the event handlers inside [`components/.tsx`](components/ChatKitPanel.tsx) to integrate with your product analytics or storage.
-
-## Optional: Redpanda Telemetry
-
-This starter can emit chat telemetry (response start/end, tool calls, thread changes, and widget errors) to a Redpanda/Kafka topic using `kafkajs`.
-
-1) Install the dependency:
-
+Install KafkaJS:
 ```bash
 npm i kafkajs
 ```
 
-2) Configure environment variables in `.env.local` (see `.env.example` for all options):
+Configure in `.env.local`:
+- `REDPANDA_BROKERS` - Broker list
+- `REDPANDA_SASL_USERNAME` / `REDPANDA_SASL_PASSWORD` - Credentials
+- `REDPANDA_SASL_MECHANISM` - `scram-sha-256` or `scram-sha-512`
+- `REDPANDA_CA_CERT` - PEM certificate
+- `REDPANDA_TELEMETRY_TOPIC` - Topic name (default: `chatkit_telemetry`)
 
-- `REDPANDA_BROKERS` — Comma-separated broker list from your Redpanda Cloud cluster overview.
-- `REDPANDA_SASL_USERNAME` / `REDPANDA_SASL_PASSWORD` — API key and secret.
-- `REDPANDA_SASL_MECHANISM` — `scram-sha-256` (default) or `scram-sha-512`.
-- `REDPANDA_CA_CERT` — Paste the PEM CA certificate content, or use `REDPANDA_CA_CERT_BASE64`.
-- `REDPANDA_TELEMETRY_TOPIC` — Defaults to `chatkit_telemetry`.
-
-3) Run the app and interact with the chat. The client sends events to `POST /api/telemetry`, and the server publishes them to your topic. If Redpanda env vars are not set, the endpoint no-ops and returns `{ status: "disabled" }`.
-
-4) Quick test without the UI:
-
+Test telemetry:
 ```bash
 curl -s http://localhost:3000/api/telemetry \
   -H 'content-type: application/json' \
   -d '{"type":"smoke_test","data":{"hello":"world"}}'
 ```
 
-Messages include: `type`, `workflowId`, `userId` (from the session cookie), `data`, and `ts`.
+---
+
+## Backend: Reactive Project Agent
+
+Event-driven agent system for automated project coordination via GitHub/Jira webhooks.
+
+### Architecture
+
+```
+GitHub/Jira → Redpanda (issues) → Gateway → AgentKit → Actions
+                                                ↓
+                                    Calendar/Notifications
+                                                ↓
+                                    Redpanda (actions/outcomes)
+```
+
+### Agent Capabilities
+
+- Monitors GitHub/Jira issue events
+- Applies policy-based routing:
+  - P0 bugs escalate to platform team
+  - Frontend issues assign to specialists
+  - Overdue tasks schedule unblocker meetings
+  - New issues send triage nudges
+- Records actions and outcomes for observability
+
+### Directory Structure
+
+```
+backend/
+├── webhooks/    # GitHub/Jira receivers
+├── gateway/     # Event consumer
+├── agentkit/    # Mock agent implementation
+├── calendar/    # Mock calendar/notification API
+├── events/      # Test event publisher
+├── samples/     # Sample event files
+└── docker/      # Redpanda Docker Compose
+```
+
+### Quick Start
+
+Install dependencies:
+```bash
+pip install -r backend/requirements.txt
+```
+
+Configure environment:
+```bash
+cp backend/.env.example backend/.env
+```
+
+Required variables:
+- `PANDA_PROXY` - Redpanda Pandaproxy URL
+- `AGENTKIT_URL` - AgentKit endpoint
+- `CALENDAR_API_BASE` - Calendar service URL
+- `GITHUB_WEBHOOK_SECRET` - Webhook secret
+
+Start all services:
+```bash
+bash backend/start-all.sh
+```
+
+Services started:
+- Mock Calendar API (port 7300)
+- Mock AgentKit Agent (port 8000)
+- GitHub Webhook Receiver (port 7000)
+- Gateway Consumer (background)
+- Redpanda (ports 8082, 19092)
+
+Test event flow:
+```bash
+bash backend/test-flow.sh
+```
+
+Monitor logs:
+```bash
+tail -f logs/gateway.log
+tail -f logs/agentkit.log
+tail -f logs/calendar.log
+```
+
+Monitor Redpanda topics:
+```bash
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk topic consume actions -n 10
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk topic consume outcomes -n 10
+```
+
+Stop services:
+```bash
+bash backend/stop-all.sh
+```
+
+### Manual Testing
+
+Publish event:
+```bash
+python3 backend/events/publish.py --topic issues --file backend/samples/issue_bug_p0.json
+```
+
+Test webhook:
+```bash
+curl -X POST http://localhost:7000/github/issues \
+  -H "X-GitHub-Event: issues" \
+  -H "X-GitHub-Delivery: test-123" \
+  -H "Content-Type: application/json" \
+  -d @backend/samples/issue_bug_p0.json
+```
+
+### Message Schemas
+
+**Issues Topic:**
+```json
+{
+  "event_id": "unique-id",
+  "project_id": "alpha",
+  "source": "github|jira",
+  "type": "issue_opened|issue_created|issue_updated",
+  "repo": "org/repo",
+  "issue_number": 123,
+  "title": "Bug description",
+  "url": "https://...",
+  "labels": ["bug", "p0"],
+  "assignee": "username",
+  "priority": "P0|Highest",
+  "status": "Open",
+  "created_at": "2025-10-17T19:22:11Z"
+}
+```
+
+**Actions Topic:**
+```json
+{
+  "event_id": "a-timestamp",
+  "project_id": "alpha",
+  "action": "assign_owner|post_nudge|schedule_unblocker|escalate_owner",
+  "target": "owner:alice|team:platform",
+  "rationale": "Reason for action",
+  "source_ref": "https://github.com/org/repo/issues/123"
+}
+```
+
+**Outcomes Topic:**
+```json
+{
+  "event_id": "o-timestamp",
+  "project_id": "alpha",
+  "risk_delta": -0.2,
+  "ack": true
+}
+```
+
+### Integration
+
+Frontend and backend share the same Redpanda cluster:
+- Frontend uses `chatkit_telemetry` topic
+- Backend uses `issues`, `actions`, `outcomes` topics
+
+### Redpanda Cloud
+
+Update `backend/.env`:
+```bash
+PANDA_CLOUD_BROKERS="cluster.cloud.redpanda.com:9092"
+PANDA_CLOUD_USERNAME="username"
+PANDA_CLOUD_PASSWORD="password"
+```
+
+Modify `backend/gateway/consumer.py` and webhook receivers to use KafkaJS instead of Pandaproxy REST API.
+
+### Customization
+
+Edit `backend/agentkit/mock_agent.py` function `apply_undergoing_policy()` to modify:
+- Escalation vs assignment logic
+- Team member routing by label
+- Notification thresholds
+- Meeting durations
+
+Replace mock agent with production AgentKit by updating `AGENTKIT_URL` in `backend/.env`.
+
+### Troubleshooting
+
+Check Redpanda logs:
+```bash
+docker compose -f backend/docker/docker-compose.yml logs redpanda
+```
+
+Verify topics:
+```bash
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk topic list
+```
+
+Check consumer lag:
+```bash
+docker compose -f backend/docker/docker-compose.yml exec rpk rpk group describe agent-gw
+```
+
+Verify webhook secret in `backend/.env` matches GitHub configuration.
+
+---
 
 ## References
 
 - [ChatKit JavaScript Library](http://openai.github.io/chatkit-js/)
 - [Advanced Self-Hosting Examples](https://github.com/openai/openai-chatkit-advanced-samples)
-# breakdown
+- [Redpanda Documentation](https://docs.redpanda.com/)
+- [AgentKit Documentation](https://github.com/BCG-X-Official/agentkit)

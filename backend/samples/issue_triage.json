@@ -1,0 +1,16 @@
+{
+  "event_id": "test-004",
+  "project_id": "alpha",
+  "source": "github",
+  "type": "issue_opened",
+  "repo": "acme/docs",
+  "issue_number": 789,
+  "title": "Update API documentation for v2.0",
+  "url": "https://github.com/acme/docs/issues/789",
+  "labels": ["documentation"],
+  "assignee": null,
+  "author": "diana",
+  "created_at": "2025-10-17T22:00:00Z",
+  "state": "open",
+  "body_preview": "The API documentation is outdated and doesn't reflect the changes in v2.0 release."
+}
