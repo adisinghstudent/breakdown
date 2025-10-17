@@ -62,10 +62,7 @@ export default function ClarifyingQuestionsModal({
               <h2 className="text-3xl font-normal text-gray-900">
                 Clarifying Questions
               </h2>
-              <button
-                onClick={onCancel}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
+              <button onClick={onCancel} className="glass-btn" aria-label="Close">
                 ×
               </button>
             </div>
@@ -198,17 +195,14 @@ export default function ClarifyingQuestionsModal({
           {/* Navigation */}
           <div className="flex gap-3">
             {currentQuestionIndex > 0 && (
-              <button
-                onClick={handleBack}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-              >
+              <button onClick={handleBack} className="glass-btn">
                 Back
               </button>
             )}
             <button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 glass-btn glass-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLastQuestion ? 'Complete Setup' : 'Next'}
             </button>

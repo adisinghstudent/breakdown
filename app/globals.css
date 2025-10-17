@@ -25,6 +25,7 @@
   --color-foreground: var(--foreground);
   --font-sans: Arial, Helvetica, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-cursive: "Brush Script MT", "Lucida Handwriting", "Snell Roundhand", "URW Chancery L", "Apple Chancery", "Segoe Script", "Dancing Script", cursive, ui-serif, Georgia, "Times New Roman", Times, serif;
   --font-mono: SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
 
@@ -57,4 +58,57 @@ body {
   background-color: rgba(2, 6, 23, 0.55);
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Display title and subtitle helpers */
+.display-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.subtitle-cursive {
+  font-family: var(--font-cursive);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Glass-like buttons */
+.glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1rem; /* ~px-4 py-2.5 */
+  border-radius: 0.75rem;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+}
+.glass-btn:active {
+  transform: translateY(0);
+}
+
+.glass-btn-primary {
+  color: #ffffff;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.glass-btn-primary:hover {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.98));
+}
+
+:root[data-color-scheme="dark"] .glass-btn {
+  color: #e2e8f0;
+  background: rgba(2, 6, 23, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }

@@ -24,7 +24,7 @@ export default function App({ initialMessage }: { initialMessage?: string } = {}
     <main className="flex min-h-screen flex-col items-center justify-end p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-sky-200 via-orange-50 to-orange-100">
       <div className="mx-auto w-full max-w-5xl">
         <div className="mb-4 text-center">
-          <p className="text-base text-slate-700 font-serif italic">Tell me about your project and I’ll take it from here</p>
+          <p className="text-base text-slate-700 subtitle-cursive">Tell me about your project and I’ll take it from here</p>
         </div>
         <ChatKitPanel
           theme={scheme}

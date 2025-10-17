@@ -437,7 +437,7 @@ export default function ProjectDefinitionForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full glass-btn glass-btn-primary text-white font-medium py-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Processing...' : 'Create Project & Get Clarifying Questions'}
             </button>

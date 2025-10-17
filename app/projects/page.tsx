@@ -91,10 +91,7 @@ export default function ProjectsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-5xl font-normal text-gray-900">Projects</h1>
-            <Link
-              href="/create-project"
-              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-            >
+            <Link href="/create-project" className="glass-btn glass-btn-primary">
               + New Project
             </Link>
           </div>
@@ -134,10 +131,7 @@ export default function ProjectsPage() {
             <p className="text-gray-600 text-lg mb-4">
               No {activeTab} projects yet
             </p>
-            <Link
-              href="/create-project"
-              className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-            >
+            <Link href="/create-project" className="inline-block glass-btn glass-btn-primary">
               Create Your First Project
             </Link>
           </div>
