@@ -1,0 +1,16 @@
+{
+  "event_id": "test-001",
+  "project_id": "alpha",
+  "source": "github",
+  "type": "issue_opened",
+  "repo": "acme/backend",
+  "issue_number": 123,
+  "title": "Critical: Database connection pool exhausted",
+  "url": "https://github.com/acme/backend/issues/123",
+  "labels": ["bug", "p0", "database"],
+  "assignee": null,
+  "author": "bob",
+  "created_at": "2025-10-17T19:22:11Z",
+  "state": "open",
+  "body_preview": "Production database connections are being exhausted under high load. Response times degraded by 10x. Requires immediate investigation."
+}

@@ -1,0 +1,16 @@
+{
+  "event_id": "test-002",
+  "project_id": "alpha",
+  "source": "github",
+  "type": "issue_opened",
+  "repo": "acme/frontend",
+  "issue_number": 456,
+  "title": "Button alignment is off on mobile Safari",
+  "url": "https://github.com/acme/frontend/issues/456",
+  "labels": ["frontend", "ui", "mobile"],
+  "assignee": null,
+  "author": "charlie",
+  "created_at": "2025-10-17T20:15:00Z",
+  "state": "open",
+  "body_preview": "The submit button on the login form is misaligned on mobile Safari iOS 17. Screenshots attached."
+}
