@@ -1,10 +1,10 @@
-# ChatKit Starter Template
+# Breakdown
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![NextJS](https://img.shields.io/badge/Built_with-NextJS-blue)
 ![OpenAI API](https://img.shields.io/badge/Powered_by-OpenAI_API-orange)
 
-Production-ready ChatKit application with Next.js UI, OpenAI Agent Builder integration, and reactive backend agent for project coordination.
+AI-powered project coordination system with Next.js ChatKit interface and event-driven backend agent for automated GitHub/Jira issue management.
 
 ## Frontend: ChatKit Interface
 
@@ -265,6 +265,5 @@ Verify webhook secret in `backend/.env` matches GitHub configuration.
 ## References
 
 - [ChatKit JavaScript Library](http://openai.github.io/chatkit-js/)
-- [Advanced Self-Hosting Examples](https://github.com/openai/openai-chatkit-advanced-samples)
 - [Redpanda Documentation](https://docs.redpanda.com/)
 - [AgentKit Documentation](https://github.com/BCG-X-Official/agentkit)
